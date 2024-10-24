@@ -1,10 +1,16 @@
+import 'dart:developer';
+
+import 'package:astech_demo/firebase_options.dart';
 import 'package:astech_demo/home_screen.dart';
 import 'package:astech_demo/local_notification_manager.dart';
+import 'package:astech_demo/push_notification_manager.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalNotificationManager().init();
+  await PushNotificationManager().init();
+
   runApp(const MyApp());
 }
 

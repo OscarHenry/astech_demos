@@ -8,14 +8,17 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-          ],
+      body: StreamBuilder(
+        stream: LocalNotificationManager.selectNotificationStream.stream,
+        builder: (context, snapshot) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const <Widget>[
+              Text(
+                'You have pushed the button this many times:',
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(

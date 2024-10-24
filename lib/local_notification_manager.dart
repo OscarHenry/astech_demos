@@ -3,52 +3,24 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:http/http.dart' as http;
-import 'package:image/image.dart' as image;
-import 'package:path_provider/path_provider.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-int id = 0;
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-    FlutterLocalNotificationsPlugin();
-
-final StreamController<String?> selectNotificationStream =
-    StreamController<String?>.broadcast();
-
-const MethodChannel platform =
-    MethodChannel('dexterx.dev/flutter_local_notifications_example');
-
-const String portName = 'notification_send_port';
-
-String? selectedNotificationPayload;
-
-/// A notification action which triggers a url launch event
-const String urlLaunchActionId = 'id_1';
-
-/// A notification action which triggers a App navigation event
-const String navigationActionId = 'id_3';
-
-/// Defines a iOS/MacOS notification category for text input actions.
-const String darwinNotificationCategoryText = 'textCategory';
-
-/// Defines a iOS/MacOS notification category for plain actions.
-const String darwinNotificationCategoryPlain = 'plainCategory';
-
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse notificationResponse) {
-  // ignore: avoid_print
-  print('notification(${notificationResponse.id}) action tapped: '
-      '${notificationResponse.actionId} with'
-      ' payload: ${notificationResponse.payload}');
+  log(
+    'notification(${notificationResponse.id}) action tapped: '
+    '${notificationResponse.actionId} with'
+    ' payload: ${notificationResponse.payload}',
+    name: 'notificationTapBackground',
+  );
   if (notificationResponse.input?.isNotEmpty ?? false) {
-    // ignore: avoid_print
-    print(
-        'notification action tapped with input: ${notificationResponse.input}');
+    log(
+      'notification action tapped with input: ${notificationResponse.input}',
+      name: 'notificationTapBackground',
+    );
   }
 }
 
@@ -61,6 +33,28 @@ class LocalNotificationManager {
   }
 
   LocalNotificationManager._internal();
+
+  static final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  static final StreamController<String?> selectNotificationStream =
+      StreamController<String?>.broadcast();
+
+  /// A notification action which triggers a url launch event
+  static const String urlLaunchActionId = 'id_1';
+
+  /// A notification action which triggers a App navigation event
+  static const String navigationActionId = 'id_3';
+
+  /// Defines a iOS/MacOS notification category for text input actions.
+  static const String darwinNotificationCategoryText = 'textCategory';
+
+  /// Defines a iOS/MacOS notification category for plain actions.
+  static const String darwinNotificationCategoryPlain = 'plainCategory';
+
+  static int id = 0;
+
+  String? selectedNotificationPayload;
 
   Future<void> _configureLocalTimeZone() async {
     if (kIsWeb || Platform.isLinux) {
@@ -88,7 +82,7 @@ class LocalNotificationManager {
       // }
 
       const AndroidInitializationSettings initializationSettingsAndroid =
-          AndroidInitializationSettings('app_icon');
+          AndroidInitializationSettings('@mipmap/ic_launcher');
 
       final List<DarwinNotificationCategory> darwinNotificationCategories =
           <DarwinNotificationCategory>[
@@ -181,28 +175,47 @@ class LocalNotificationManager {
     String? payload,
   }) async {
     // show a notification
+
+    final AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+      channelId,
+      channelName,
+      icon: icon,
+      importance: importance,
+      priority: priority,
+      showWhen: showWhen,
+    );
+
+    const DarwinNotificationDetails iosNotificationDetails =
+        DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
     await flutterLocalNotificationsPlugin.show(
       id += 1,
       title,
       body,
       NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelId,
-          channelName,
-          icon: icon,
-          importance: importance,
-          priority: priority,
-          showWhen: showWhen,
-        ),
+        android: androidNotificationDetails,
+        iOS: iosNotificationDetails,
       ),
       payload: payload,
     );
   }
 
+  /// used to handle the tap on the notification
   void onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) {
-    log('$notificationResponse', name: 'onDidReceiveNotificationResponse');
+    log(
+        'id: ${notificationResponse.id}, '
+        'actionId: ${notificationResponse.actionId}, '
+        'input ${notificationResponse.input}, '
+        'payload: ${notificationResponse.payload}, '
+        'type: ${notificationResponse.notificationResponseType}',
+        name: 'onDidReceiveNotificationResponse');
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
         selectNotificationStream.add(notificationResponse.payload);
