@@ -209,20 +209,19 @@ class LocalNotificationManager {
   void onDidReceiveNotificationResponse(
     NotificationResponse notificationResponse,
   ) {
-    log(
-        'id: ${notificationResponse.id}, '
+    final message = 'id: ${notificationResponse.id}, '
         'actionId: ${notificationResponse.actionId}, '
         'input ${notificationResponse.input}, '
         'payload: ${notificationResponse.payload}, '
-        'type: ${notificationResponse.notificationResponseType}',
-        name: 'onDidReceiveNotificationResponse');
+        'type: ${notificationResponse.notificationResponseType}';
+    log(message, name: 'onDidReceiveNotificationResponse');
     switch (notificationResponse.notificationResponseType) {
       case NotificationResponseType.selectedNotification:
-        selectNotificationStream.add(notificationResponse.payload);
+        selectNotificationStream.add(message);
         break;
       case NotificationResponseType.selectedNotificationAction:
         if (notificationResponse.actionId == navigationActionId) {
-          selectNotificationStream.add(notificationResponse.payload);
+          selectNotificationStream.add(message);
         }
         break;
     }
